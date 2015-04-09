@@ -1,6 +1,6 @@
 __author__ = 'Soulweaver'
 
-import sys, math
+import sys, math, subprocess
 import pygame
 from menuevent import MenuEvent, MenuEventType
 
@@ -62,6 +62,8 @@ class EmuSwitch:
             'axisThreshold': 0.3
         }
 
+        self.runningProcess = None
+
     def start(self):
         while True:
             self.tick()
@@ -78,6 +80,8 @@ class EmuSwitch:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif self.runningProcess is not None:
+                pass
             else:
                 p_event = None
                 if event.type == pygame.KEYDOWN:
@@ -128,16 +132,31 @@ class EmuSwitch:
                         obj.input(p_event)
                     print(p_event.kind, p_event.repeat)
 
-        # Check for game kill switches
-        joystick_count = pygame.joystick.get_count()
-        for i in range(joystick_count):
-            if all([pygame.joystick.Joystick(i).get_button(button)
-                    for button in self.config['gameKillSwitches']['joystick']]):
-                print("Kill switch on joystick", i)
+                    if p_event.kind == MenuEventType.accept:
+                        print("Starting application...")
+                        self.runningProcess = subprocess.Popen('calc', stdin=None, stdout=None, stderr=None,
+                                                               close_fds=True)
+                        print("Application started.")
 
-        pressed_keys = pygame.key.get_pressed()
-        if all([pressed_keys[key] for key in self.config['gameKillSwitches']['keyboard']]):
-            print("Kill switch on keyboard")
+        if self.runningProcess is not None:
+            # Check for game kill switches
+            kill = False
+
+            joystick_count = pygame.joystick.get_count()
+            for i in range(joystick_count):
+                if all([pygame.joystick.Joystick(i).get_button(button)
+                        for button in self.config['gameKillSwitches']['joystick']]):
+                    kill = True
+
+            pressed_keys = pygame.key.get_pressed()
+            if all([pressed_keys[key] for key in self.config['gameKillSwitches']['keyboard']]):
+                kill = True
+
+            if kill:
+                print("Kill switch recognized, killing the application...")
+                self.runningProcess.terminate()
+                self.runningProcess.wait()
+                self.runningProcess = None
 
     def tick_process(self):
         for obj in self.UIObjects:
