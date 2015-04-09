@@ -99,20 +99,10 @@ class EmuSwitch:
                         p_event = MenuEventType.cancel
 
                 elif event.type == pygame.JOYBUTTONDOWN:
-                    if event.button == self.config['joyButtons']['up']:
-                        p_event = MenuEventType.up
-                    elif event.button == self.config['joyButtons']['down']:
-                        p_event = MenuEventType.down
-                    elif event.button == self.config['joyButtons']['left']:
-                        p_event = MenuEventType.left
-                    elif event.button == self.config['joyButtons']['right']:
-                        p_event = MenuEventType.right
-                    elif event.button == self.config['joyButtons']['accept']:
-                        p_event = MenuEventType.accept
-                    elif event.button == self.config['joyButtons']['cancel']:
-                        p_event = MenuEventType.cancel
-                    elif event.button == self.config['joyButtons']['information']:
-                        p_event = MenuEventType.information
+                    for action, button in self.config['joyButtons'].items():
+                        if event.button == button:
+                            p_event = MenuEventType[action]
+                            break
 
                 elif event.type == pygame.JOYAXISMOTION and math.fabs(event.value) > self.config['axisThreshold']:
                     if event.axis == self.config['joyAxis']['upDown']:
