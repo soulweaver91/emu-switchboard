@@ -1,10 +1,15 @@
 __author__ = 'Soulweaver'
 
 import subprocess
+import sys
 
 
 def noop_cb(env):
     pass
+
+
+def exit_program_fn(env):
+    sys.exit()
 
 
 def open_calc_fn(env):

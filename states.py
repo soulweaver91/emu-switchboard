@@ -1,7 +1,6 @@
 __author__ = 'Soulweaver'
 
 import copy
-import sys
 import statefuncs
 
 
@@ -44,4 +43,4 @@ def previous_state():
 
 
 def exit_program():
-    return make_state([], sys.exit)
+    return make_state([], statefuncs.exit_program_fn)
