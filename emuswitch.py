@@ -167,16 +167,22 @@ class EmuSwitch:
 
     def tick_draw(self):
         # Paint the backdrop
-        self.screen.blit(self.backdrop, self.backdrop.get_rect())
-        fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", fonts.c_white)
-        fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", fonts.c_white, size=20)
+        if self.runningProcess is not None:
+            self.screen.fill(fonts.c_black)
+            fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, "Game in progress...",
+                                                                      (640, 360)),
+                                      "Game in progress...", fonts.c_white)
+        else:
+            self.screen.blit(self.backdrop, self.backdrop.get_rect())
+            fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", fonts.c_white)
+            fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", fonts.c_white, size=20)
 
-        opt_name = "Current option: " + self.get_current_option_name()
-        fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, opt_name, (640, 480)), opt_name,
-                                  fonts.c_white, size=30)
+            opt_name = "Current option: " + self.get_current_option_name()
+            fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, opt_name, (640, 480), 30),
+                                      opt_name, fonts.c_white, size=30)
 
-        for obj in self.UIObjects:
-            obj.draw(self.screen)
+            for obj in self.UIObjects:
+                obj.draw(self.screen)
 
         pygame.display.flip()
 
