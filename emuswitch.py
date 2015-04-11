@@ -1,7 +1,12 @@
 __author__ = 'Soulweaver'
 
-import sys, math, subprocess
+import os
+import sys
+import math
+import subprocess
 import pygame
+
+import fonts
 from menuevent import MenuEvent, MenuEventType
 
 
@@ -12,7 +17,7 @@ class EmuSwitch:
         # Initialize pygame and joystick support
         pygame.init()
         pygame.joystick.init()
-        pygame.display.set_caption("EmuSwitchboard")
+        pygame.display.set_caption("Emulator Switchboard")
 
         # Set repeat mode for keys
         # Wait 0.5 seconds, then send events every 0.1 seconds
@@ -63,6 +68,7 @@ class EmuSwitch:
         }
 
         self.runningProcess = None
+        self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
 
     def start(self):
         while True:
@@ -153,8 +159,14 @@ class EmuSwitch:
             obj.process()
 
     def tick_draw(self):
-        # Paint the window black
-        self.screen.fill((0, 0, 0))
+        # Paint the backdrop
+        self.screen.blit(self.backdrop, self.backdrop.get_rect())
+        fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", (255, 255, 255))
+        fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", (255, 255, 255), size=20)
+
+        fonts.main_font.render_to(self.screen,
+                                  fonts.centered_pos(fonts.main_font, "Press Accept to open Calculator", (640, 360)),
+                                  "Press Accept to open Calculator", (255, 255, 255))
 
         for obj in self.UIObjects:
             obj.draw(self.screen)
