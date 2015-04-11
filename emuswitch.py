@@ -8,6 +8,7 @@ import pygame
 
 import fonts
 from menuevent import MenuEvent, MenuEventType
+import states
 
 
 class EmuSwitch:
@@ -70,6 +71,9 @@ class EmuSwitch:
         self.runningProcess = None
         self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
 
+        self.states = []
+        self.enter_state(states.main())
+
     def start(self):
         while True:
             self.tick()
@@ -129,10 +133,13 @@ class EmuSwitch:
                     print(p_event.kind, p_event.repeat)
 
                     if p_event.kind == MenuEventType.accept:
-                        print("Starting application...")
-                        self.runningProcess = subprocess.Popen('calc', stdin=None, stdout=None, stderr=None,
-                                                               close_fds=True)
-                        print("Application started.")
+                        self.select_option()
+                    elif p_event.kind == MenuEventType.left:
+                        self.prev_option()
+                    elif p_event.kind == MenuEventType.right:
+                        self.next_option()
+                    elif p_event.kind == MenuEventType.information:
+                        print(repr(self.states))
 
         if self.runningProcess is not None:
             # Check for game kill switches
@@ -164,14 +171,47 @@ class EmuSwitch:
         fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", fonts.c_white)
         fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", fonts.c_white, size=20)
 
-        fonts.main_font.render_to(self.screen,
-                                  fonts.centered_pos(fonts.main_font, "Press Accept to open Calculator", (640, 360)),
-                                  "Press Accept to open Calculator", (255, 255, 255))
+        opt_name = "Current option: " + self.get_current_option_name()
+        fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, opt_name, (640, 480)), opt_name,
+                                  fonts.c_white, size=30)
 
         for obj in self.UIObjects:
             obj.draw(self.screen)
 
         pygame.display.flip()
+
+    def enter_state(self, state):
+        if len(state['options']) > 0:
+            self.states.append(state)
+
+        state['callback'](self)
+
+    def exit_state(self):
+        self.states.pop()
+
+    def next_option(self):
+        self.states[-1]['cursor_pos'] = (self.states[-1]['cursor_pos'] + 1) % len(self.states[-1]['options'])
+
+    def prev_option(self):
+        self.states[-1]['cursor_pos'] = (self.states[-1]['cursor_pos'] - 1) % len(self.states[-1]['options'])
+
+    def select_option(self):
+        try:
+            # Select from the current state, from the position the cursor is currently, the second item of the tuple,
+            # which names a function in the imported states, and then call that function with the items in the same
+            # tuple starting from the third one
+            received_state = getattr(states, self.states[-1]['options'][self.states[-1]['cursor_pos']][1])(
+                *self.states[-1]['options'][self.states[-1]['cursor_pos']][2:]
+            )
+        except AttributeError:
+            print('ERROR: Invalid target state, trying to cope by ignoring it...')
+        except:
+            raise
+        else:
+            self.enter_state(received_state)
+
+    def get_current_option_name(self):
+        return self.states[-1]['options'][self.states[-1]['cursor_pos']][0]
 
 # Initialize the application
 if __name__ == "__main__":
