@@ -161,8 +161,8 @@ class EmuSwitch:
     def tick_draw(self):
         # Paint the backdrop
         self.screen.blit(self.backdrop, self.backdrop.get_rect())
-        fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", (255, 255, 255))
-        fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", (255, 255, 255), size=20)
+        fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", fonts.c_white)
+        fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", fonts.c_white, size=20)
 
         fonts.main_font.render_to(self.screen,
                                   fonts.centered_pos(fonts.main_font, "Press Accept to open Calculator", (640, 360)),
