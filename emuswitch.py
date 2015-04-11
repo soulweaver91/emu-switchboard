@@ -200,9 +200,8 @@ class EmuSwitch:
             # Select from the current state, from the position the cursor is currently, the second item of the tuple,
             # which names a function in the imported states, and then call that function with the items in the same
             # tuple starting from the third one
-            received_state = getattr(states, self.states[-1]['options'][self.states[-1]['cursor_pos']][1])(
-                *self.states[-1]['options'][self.states[-1]['cursor_pos']][2:]
-            )
+            selected_option = self.states[-1]['options'][self.states[-1]['cursor_pos']]
+            received_state = getattr(states, selected_option[1])(*selected_option[2:])
         except AttributeError:
             print('ERROR: Invalid target state, trying to cope by ignoring it...')
         except:
