@@ -1,8 +1,13 @@
 __author__ = 'Soulweaver'
 
-import sys, math, subprocess
+import os
+import sys
+import math
 import pygame
+
+import fonts
 from menuevent import MenuEvent, MenuEventType
+import states
 
 
 class EmuSwitch:
@@ -12,7 +17,7 @@ class EmuSwitch:
         # Initialize pygame and joystick support
         pygame.init()
         pygame.joystick.init()
-        pygame.display.set_caption("EmuSwitchboard")
+        pygame.display.set_caption("Emulator Switchboard")
 
         # Set repeat mode for keys
         # Wait 0.5 seconds, then send events every 0.1 seconds
@@ -63,6 +68,10 @@ class EmuSwitch:
         }
 
         self.runningProcess = None
+        self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
+
+        self.states = []
+        self.enter_state(states.main())
 
     def start(self):
         while True:
@@ -123,10 +132,13 @@ class EmuSwitch:
                     print(p_event.kind, p_event.repeat)
 
                     if p_event.kind == MenuEventType.accept:
-                        print("Starting application...")
-                        self.runningProcess = subprocess.Popen('calc', stdin=None, stdout=None, stderr=None,
-                                                               close_fds=True)
-                        print("Application started.")
+                        self.select_option()
+                    elif p_event.kind == MenuEventType.left:
+                        self.prev_option()
+                    elif p_event.kind == MenuEventType.right:
+                        self.next_option()
+                    elif p_event.kind == MenuEventType.information:
+                        print(repr(self.states))
 
         if self.runningProcess is not None:
             # Check for game kill switches
@@ -152,14 +164,62 @@ class EmuSwitch:
         for obj in self.UIObjects:
             obj.process()
 
-    def tick_draw(self):
-        # Paint the window black
-        self.screen.fill((0, 0, 0))
+        if self.runningProcess is not None:
+            if self.runningProcess.poll() is not None:
+                self.runningProcess = None
 
-        for obj in self.UIObjects:
-            obj.draw(self.screen)
+    def tick_draw(self):
+        # Paint the backdrop
+        if self.runningProcess is not None:
+            self.screen.fill(fonts.c_black)
+            fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, "Game in progress...",
+                                                                      (640, 360)),
+                                      "Game in progress...", fonts.c_white)
+        else:
+            self.screen.blit(self.backdrop, self.backdrop.get_rect())
+            fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", fonts.c_white)
+            fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", fonts.c_white, size=20)
+
+            opt_name = "Current option: " + self.get_current_option_name()
+            fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, opt_name, (640, 480), 30),
+                                      opt_name, fonts.c_white, size=30)
+
+            for obj in self.UIObjects:
+                obj.draw(self.screen)
 
         pygame.display.flip()
+
+    def enter_state(self, state):
+        if len(state['options']) > 0:
+            self.states.append(state)
+
+        state['callback'](self)
+
+    def exit_state(self):
+        self.states.pop()
+
+    def next_option(self):
+        self.states[-1]['cursor_pos'] = (self.states[-1]['cursor_pos'] + 1) % len(self.states[-1]['options'])
+
+    def prev_option(self):
+        self.states[-1]['cursor_pos'] = (self.states[-1]['cursor_pos'] - 1) % len(self.states[-1]['options'])
+
+    def select_option(self):
+        try:
+            # Select from the current state, from the position the cursor is currently, the second item of the tuple,
+            # which names a function in the imported states, and then call that function with the items in the same
+            # tuple starting from the third one
+            selected_option = self.states[-1]['options'][self.states[-1]['cursor_pos']]
+            received_state = getattr(states, selected_option[1])(*selected_option[2:])
+        except AttributeError:
+            print('ERROR: Invalid target state, trying to cope by ignoring it...')
+        except:
+            raise
+        else:
+            self.enter_state(received_state)
+
+    def get_current_option_name(self):
+        return self.states[-1]['options'][self.states[-1]['cursor_pos']][0]
 
 # Initialize the application
 if __name__ == "__main__":
