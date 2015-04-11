@@ -3,7 +3,6 @@ __author__ = 'Soulweaver'
 import os
 import sys
 import math
-import subprocess
 import pygame
 
 import fonts
@@ -164,6 +163,10 @@ class EmuSwitch:
     def tick_process(self):
         for obj in self.UIObjects:
             obj.process()
+
+        if self.runningProcess is not None:
+            if self.runningProcess.poll() is not None:
+                self.runningProcess = None
 
     def tick_draw(self):
         # Paint the backdrop
