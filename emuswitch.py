@@ -64,7 +64,7 @@ class EmuSwitch:
                 'joystick': [4, 5, 6, 7, 10, 11],
                 'keyboard': [pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_k]
             },
-            'axisThreshold': 0.3
+            'axisThreshold': 0.95
         }
 
         self.runningProcess = None
