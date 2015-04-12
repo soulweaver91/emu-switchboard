@@ -4,11 +4,12 @@ import copy
 import statefuncs
 
 
-def make_state(options, callback):
+def make_state(options, callback, name="Unnamed state"):
     return {
         'options': copy.copy(options),
         'callback': callback,
-        'cursor_pos': 0
+        'cursor_pos': 0,
+        'name': name
     }
 
 
@@ -22,7 +23,7 @@ def main():
         ('SNES', 'list_platform', 'snes'),
         ('Test function', 'open_calc'),
         ('Quit', 'exit_program')
-    ], statefuncs.noop_cb)
+    ], statefuncs.noop_cb, "Main Menu")
 
 
 def list_platform(platform):
@@ -30,8 +31,9 @@ def list_platform(platform):
 
     return make_state([
         ('No ' + platform + ' type files found', 'informative_option'),
+        ('Recursive state test', 'list_platform', platform),
         ('Back', 'previous_state')
-    ], statefuncs.noop_cb)
+    ], statefuncs.noop_cb, platform + " games")
 
 
 def informative_option():

@@ -133,9 +133,14 @@ class EmuSwitch:
 
                     if p_event.kind == MenuEventType.accept:
                         self.select_option()
-                    elif p_event.kind == MenuEventType.left:
+                    elif p_event.kind == MenuEventType.cancel:
+                        if len(self.states) > 1:
+                            self.exit_state()
+                        else:
+                            self.states[0]['cursor_pos'] = len(self.states[0]['options']) - 1
+                    elif p_event.kind == MenuEventType.up:
                         self.prev_option()
-                    elif p_event.kind == MenuEventType.right:
+                    elif p_event.kind == MenuEventType.down:
                         self.next_option()
                     elif p_event.kind == MenuEventType.information:
                         print(repr(self.states))
@@ -178,11 +183,16 @@ class EmuSwitch:
         else:
             self.screen.blit(self.backdrop, self.backdrop.get_rect())
             fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", fonts.c_white)
-            fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", fonts.c_white, size=20)
+            fonts.main_font.render_to(self.screen, (30, 70), ' '.join(["» " + state['name'] for state in self.states]),
+                                      fonts.c_white, size=20)
 
-            opt_name = "Current option: " + self.get_current_option_name()
-            fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, opt_name, (640, 480), 30),
-                                      opt_name, fonts.c_white, size=30)
+            for idx, option in enumerate(self.states[-1]["options"]):
+                color = fonts.c_ltgray
+                if self.states[-1]['cursor_pos'] == idx:
+                    color = fonts.c_white
+                fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, option[0],
+                                                                          (640, 240 + idx * 30), 30),
+                                          option[0], color, size=30)
 
             for obj in self.UIObjects:
                 obj.draw(self.screen)
@@ -217,9 +227,6 @@ class EmuSwitch:
             raise
         else:
             self.enter_state(received_state)
-
-    def get_current_option_name(self):
-        return self.states[-1]['options'][self.states[-1]['cursor_pos']][0]
 
 # Initialize the application
 if __name__ == "__main__":
