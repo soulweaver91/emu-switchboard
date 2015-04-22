@@ -13,6 +13,7 @@ mono_font = pygame.freetype.Font(os.path.join('assets', 'DroidSansMono.ttf'), si
 
 c_white = (255, 255, 255)
 c_black = (0, 0, 0)
+c_ltgray = (192, 192, 192)
 
 
 def centered_pos(font, text, pos, size=None):

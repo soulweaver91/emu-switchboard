@@ -64,7 +64,7 @@ class EmuSwitch:
                 'joystick': [4, 5, 6, 7, 10, 11],
                 'keyboard': [pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_k]
             },
-            'axisThreshold': 0.3
+            'axisThreshold': 0.95
         }
 
         self.runningProcess = None
@@ -133,10 +133,19 @@ class EmuSwitch:
 
                     if p_event.kind == MenuEventType.accept:
                         self.select_option()
-                    elif p_event.kind == MenuEventType.left:
+                    elif p_event.kind == MenuEventType.cancel:
+                        if len(self.states) > 1:
+                            self.exit_state()
+                        else:
+                            self.states[0]['cursor_pos'] = len(self.states[0]['options']) - 1
+                    elif p_event.kind == MenuEventType.up:
                         self.prev_option()
-                    elif p_event.kind == MenuEventType.right:
+                    elif p_event.kind == MenuEventType.down:
                         self.next_option()
+                    elif p_event.kind == MenuEventType.left and self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                        self.prev_page()
+                    elif p_event.kind == MenuEventType.right and self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                        self.next_page()
                     elif p_event.kind == MenuEventType.information:
                         print(repr(self.states))
 
@@ -178,11 +187,26 @@ class EmuSwitch:
         else:
             self.screen.blit(self.backdrop, self.backdrop.get_rect())
             fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", fonts.c_white)
-            fonts.main_font.render_to(self.screen, (30, 70), "» Main Menu", fonts.c_white, size=20)
+            fonts.main_font.render_to(self.screen, (30, 70), ' '.join(["» " + state['name'] for state in self.states]),
+                                      fonts.c_white, size=20)
 
-            opt_name = "Current option: " + self.get_current_option_name()
-            fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, opt_name, (640, 480), 30),
-                                      opt_name, fonts.c_white, size=30)
+            if self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                min_pos = max(self.states[-1]['cursor_pos'] - 9, 0)
+                min_offset = min_pos - self.states[-1]['cursor_pos'] + 9
+                for idx, option in enumerate(self.states[-1]["options"][min_pos:min_pos+19]):
+                    if idx == 9 - min_offset:
+                        self.screen.fill(fonts.c_white, pygame.Rect(55, 115 + idx * 30, 800, 35))
+                        fonts.main_font.render_to(self.screen, (60, 120 + idx * 30), option[0], fonts.c_black, size=30)
+                    else:
+                        fonts.main_font.render_to(self.screen, (60, 120 + idx * 30), option[0], fonts.c_white, size=30)
+            else:
+                for idx, option in enumerate(self.states[-1]["options"]):
+                    color = fonts.c_ltgray
+                    if self.states[-1]['cursor_pos'] == idx:
+                        color = fonts.c_white
+                    fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, option[0],
+                                                                              (640, 240 + idx * 30), 30),
+                                              option[0], color, size=30)
 
             for obj in self.UIObjects:
                 obj.draw(self.screen)
@@ -204,6 +228,18 @@ class EmuSwitch:
     def prev_option(self):
         self.states[-1]['cursor_pos'] = (self.states[-1]['cursor_pos'] - 1) % len(self.states[-1]['options'])
 
+    def next_page(self):
+        if self.states[-1]['cursor_pos'] == len(self.states[-1]['options']) - 1:
+            self.next_option()
+        else:
+            self.states[-1]['cursor_pos'] = min(self.states[-1]['cursor_pos'] + 18, len(self.states[-1]['options']) - 1)
+
+    def prev_page(self):
+        if self.states[-1]['cursor_pos'] == 0:
+            self.prev_option()
+        else:
+            self.states[-1]['cursor_pos'] = max(self.states[-1]['cursor_pos'] - 18, 0)
+
     def select_option(self):
         try:
             # Select from the current state, from the position the cursor is currently, the second item of the tuple,
@@ -217,9 +253,6 @@ class EmuSwitch:
             raise
         else:
             self.enter_state(received_state)
-
-    def get_current_option_name(self):
-        return self.states[-1]['options'][self.states[-1]['cursor_pos']][0]
 
 # Initialize the application
 if __name__ == "__main__":
