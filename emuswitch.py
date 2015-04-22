@@ -142,6 +142,10 @@ class EmuSwitch:
                         self.prev_option()
                     elif p_event.kind == MenuEventType.down:
                         self.next_option()
+                    elif p_event.kind == MenuEventType.left and self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                        self.prev_page()
+                    elif p_event.kind == MenuEventType.right and self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                        self.next_page()
                     elif p_event.kind == MenuEventType.information:
                         print(repr(self.states))
 
@@ -186,13 +190,23 @@ class EmuSwitch:
             fonts.main_font.render_to(self.screen, (30, 70), ' '.join(["» " + state['name'] for state in self.states]),
                                       fonts.c_white, size=20)
 
-            for idx, option in enumerate(self.states[-1]["options"]):
-                color = fonts.c_ltgray
-                if self.states[-1]['cursor_pos'] == idx:
-                    color = fonts.c_white
-                fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, option[0],
-                                                                          (640, 240 + idx * 30), 30),
-                                          option[0], color, size=30)
+            if self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                min_pos = max(self.states[-1]['cursor_pos'] - 9, 0)
+                min_offset = min_pos - self.states[-1]['cursor_pos'] + 9
+                for idx, option in enumerate(self.states[-1]["options"][min_pos:min_pos+19]):
+                    if idx == 9 - min_offset:
+                        self.screen.fill(fonts.c_white, pygame.Rect(55, 115 + idx * 30, 800, 35))
+                        fonts.main_font.render_to(self.screen, (60, 120 + idx * 30), option[0], fonts.c_black, size=30)
+                    else:
+                        fonts.main_font.render_to(self.screen, (60, 120 + idx * 30), option[0], fonts.c_white, size=30)
+            else:
+                for idx, option in enumerate(self.states[-1]["options"]):
+                    color = fonts.c_ltgray
+                    if self.states[-1]['cursor_pos'] == idx:
+                        color = fonts.c_white
+                    fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, option[0],
+                                                                              (640, 240 + idx * 30), 30),
+                                              option[0], color, size=30)
 
             for obj in self.UIObjects:
                 obj.draw(self.screen)
@@ -213,6 +227,18 @@ class EmuSwitch:
 
     def prev_option(self):
         self.states[-1]['cursor_pos'] = (self.states[-1]['cursor_pos'] - 1) % len(self.states[-1]['options'])
+
+    def next_page(self):
+        if self.states[-1]['cursor_pos'] == len(self.states[-1]['options']) - 1:
+            self.next_option()
+        else:
+            self.states[-1]['cursor_pos'] = min(self.states[-1]['cursor_pos'] + 18, len(self.states[-1]['options']) - 1)
+
+    def prev_page(self):
+        if self.states[-1]['cursor_pos'] == 0:
+            self.prev_option()
+        else:
+            self.states[-1]['cursor_pos'] = max(self.states[-1]['cursor_pos'] - 18, 0)
 
     def select_option(self):
         try:

@@ -2,14 +2,23 @@ __author__ = 'Soulweaver'
 
 import copy
 import statefuncs
+import os
+from enum import Enum
 
 
-def make_state(options, callback, name="Unnamed state"):
+class StateMenuStyle(Enum):
+    main = 0,
+    submenu = 1,
+    filelist = 2
+
+
+def make_state(options, callback, name="Unnamed state", kind=StateMenuStyle.submenu):
     return {
         'options': copy.copy(options),
         'callback': callback,
         'cursor_pos': 0,
-        'name': name
+        'name': name,
+        'type': kind
     }
 
 
@@ -21,9 +30,10 @@ def main():
     return make_state([
         ('NES', 'list_platform', 'nes'),
         ('SNES', 'list_platform', 'snes'),
-        ('Test function', 'open_calc'),
+        ('Long list test', 'list_long_test'),
+        ('App launch test', 'open_calc'),
         ('Quit', 'exit_program')
-    ], statefuncs.noop_cb, "Main Menu")
+    ], statefuncs.noop_cb, "Main Menu", StateMenuStyle.main)
 
 
 def list_platform(platform):
@@ -33,7 +43,15 @@ def list_platform(platform):
         ('No ' + platform + ' type files found', 'informative_option'),
         ('Recursive state test', 'list_platform', platform),
         ('Back', 'previous_state')
-    ], statefuncs.noop_cb, platform + " games")
+    ], statefuncs.noop_cb, platform + " games", StateMenuStyle.submenu)
+
+
+def list_long_test():
+    dir_data = os.listdir(os.path.expanduser(os.path.join('~', 'Downloads')))
+    items = [(file, 'informative_option') for file in dir_data]
+    items.append(('Back', 'previous_state'))
+
+    return make_state(items, statefuncs.noop_cb, "Long list testing page", StateMenuStyle.filelist)
 
 
 def informative_option():
