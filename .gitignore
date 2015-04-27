@@ -55,3 +55,6 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Specific config file
+config.json

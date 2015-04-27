@@ -4,6 +4,7 @@ __author__ = 'Soulweaver'
 
 import subprocess
 import sys
+from settings import config
 
 
 def noop_cb(env):
@@ -15,13 +16,13 @@ def exit_program_fn(env):
 
 
 def open_calc_fn(env):
-    print("Starting application...")
     if sys.platform == 'win32':
         app = 'calc'
     else:
-        app = 'snes9x-rpi'
+        app = config["platforms"][0]["commandline"]
 
     try:
+        print("Launching" + app + "...")
         env.runningProcess = subprocess.Popen(app, stdin=None, stdout=None, stderr=None,
                                               close_fds=True)
     except FileNotFoundError:
