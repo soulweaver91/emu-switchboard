@@ -48,11 +48,19 @@ def list_platform(platform):
 
 
 def list_long_test():
-    dir_data = os.listdir(os.path.expanduser(os.path.join('~', 'Downloads')))
-    items = [(file, 'informative_option') for file in dir_data]
-    items.append(('Back', 'previous_state'))
+    mode = StateMenuStyle.filelist
+    try:
+        dir_data = os.listdir(os.path.expanduser(os.path.join('~', 'Games')))
+    except FileNotFoundError:
+        items = [('Error: could not open directory', 'informative_option')]
+        mode = StateMenuStyle.submenu
+    except:
+        raise
+    else:
+        items = [(file, 'informative_option') for file in dir_data]
 
-    return make_state(items, statefuncs.noop_cb, "Long list testing page", StateMenuStyle.filelist)
+    items.append(('Back', 'previous_state'))
+    return make_state(items, statefuncs.noop_cb, "Long list testing page", mode)
 
 
 def informative_option():
