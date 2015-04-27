@@ -10,6 +10,7 @@ import pygame
 import fonts
 from menuevent import MenuEvent, MenuEventType
 import states
+from settings import config
 
 
 class EmuSwitch:
@@ -47,27 +48,6 @@ class EmuSwitch:
         self.screen = pygame.display.set_mode((1280, 720))
 
         self.UIObjects = set()
-        self.config = {
-            # temporary fixed config for a specific controller model
-            'joyButtons': {
-                'down': 14,
-                'up': 12,
-                'left': 15,
-                'right': 13,
-                'accept': 2,
-                'cancel': 1,
-                'information': 9
-            },
-            'joyAxis': {
-                'upDown': 1,
-                'leftRight': 0
-            },
-            'gameKillSwitches': {
-                'joystick': [4, 5, 6, 7, 10, 11],
-                'keyboard': [pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_k]
-            },
-            'axisThreshold': 0.95
-        }
 
         self.runningProcess = None
         self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
@@ -110,18 +90,18 @@ class EmuSwitch:
                         p_event = MenuEventType.cancel
 
                 elif event.type == pygame.JOYBUTTONDOWN:
-                    for action, button in self.config['joyButtons'].items():
+                    for action, button in config['joyButtons'].items():
                         if event.button == button:
                             p_event = MenuEventType[action]
                             break
 
-                elif event.type == pygame.JOYAXISMOTION and math.fabs(event.value) > self.config['axisThreshold']:
-                    if event.axis == self.config['joyAxis']['upDown']:
+                elif event.type == pygame.JOYAXISMOTION and math.fabs(event.value) > config['axisThreshold']:
+                    if event.axis == config['joyAxis']['upDown']:
                         if event.value < 0:
                             p_event = MenuEventType.up
                         else:
                             p_event = MenuEventType.down
-                    if event.axis == self.config['joyAxis']['leftRight']:
+                    if event.axis == config['joyAxis']['leftRight']:
                         if event.value < 0:
                             p_event = MenuEventType.left
                         else:
@@ -158,11 +138,11 @@ class EmuSwitch:
             joystick_count = pygame.joystick.get_count()
             for i in range(joystick_count):
                 if all([pygame.joystick.Joystick(i).get_button(button)
-                        for button in self.config['gameKillSwitches']['joystick']]):
+                        for button in config['gameKillSwitches']['joystick']]):
                     kill = True
 
             pressed_keys = pygame.key.get_pressed()
-            if all([pressed_keys[key] for key in self.config['gameKillSwitches']['keyboard']]):
+            if all([pressed_keys[key] for key in config['gameKillSwitches']['keyboard']]):
                 kill = True
 
             if kill:

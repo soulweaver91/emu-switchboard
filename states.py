@@ -6,6 +6,7 @@ import copy
 import statefuncs
 import os
 from enum import Enum
+from settings import config
 
 
 class StateMenuStyle(Enum):
@@ -29,23 +30,22 @@ def open_calc():
 
 
 def main():
-    return make_state([
-        ('NES', 'list_platform', 'nes'),
-        ('SNES', 'list_platform', 'snes'),
+    items = [(platform["name"], 'list_platform', pos) for pos, platform in enumerate(config["platforms"])]
+    items += [
         ('Long list test', 'list_long_test'),
         ('App launch test', 'open_calc'),
         ('Quit', 'exit_program')
-    ], statefuncs.noop_cb, "Main Menu", StateMenuStyle.main)
+    ]
+
+    return make_state(items, statefuncs.noop_cb, "Main Menu", StateMenuStyle.main)
 
 
 def list_platform(platform):
-    print(platform)
-
     return make_state([
-        ('No ' + platform + ' type files found', 'informative_option'),
+        ('No ' + config["platforms"][platform]["name"] + ' type files found', 'informative_option'),
         ('Recursive state test', 'list_platform', platform),
         ('Back', 'previous_state')
-    ], statefuncs.noop_cb, platform + " games", StateMenuStyle.submenu)
+    ], statefuncs.noop_cb, config["platforms"][platform]["name"], StateMenuStyle.submenu)
 
 
 def list_long_test():
