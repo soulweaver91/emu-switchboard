@@ -5,13 +5,12 @@ __author__ = 'Soulweaver'
 import copy
 import statefuncs
 import os
-from enum import Enum
 from settings import config
 
 
-class StateMenuStyle(Enum):
-    main = 0,
-    submenu = 1,
+class StateMenuStyle:
+    main = 0
+    submenu = 1
     filelist = 2
 
 

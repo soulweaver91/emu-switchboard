@@ -77,17 +77,17 @@ class EmuSwitch:
                 p_event = None
                 if event.type == pygame.KEYDOWN:
                     if event.key in [pygame.K_UP, pygame.K_w, pygame.K_KP8]:
-                        p_event = MenuEventType.up
+                        p_event = MenuEventType["up"]
                     elif event.key in [pygame.K_DOWN, pygame.K_s, pygame.K_KP2]:
-                        p_event = MenuEventType.down
+                        p_event = MenuEventType["down"]
                     elif event.key in [pygame.K_LEFT, pygame.K_a, pygame.K_KP4]:
-                        p_event = MenuEventType.left
+                        p_event = MenuEventType["left"]
                     elif event.key in [pygame.K_RIGHT, pygame.K_d, pygame.K_KP6]:
-                        p_event = MenuEventType.right
+                        p_event = MenuEventType["right"]
                     elif event.key in [pygame.K_SPACE, pygame.K_KP_ENTER, pygame.K_RETURN]:
-                        p_event = MenuEventType.accept
+                        p_event = MenuEventType["accept"]
                     elif event.key in [pygame.K_BACKSPACE, pygame.K_ESCAPE]:
-                        p_event = MenuEventType.cancel
+                        p_event = MenuEventType["cancel"]
 
                 elif event.type == pygame.JOYBUTTONDOWN:
                     for action, button in config['joyButtons'].items():
@@ -98,14 +98,14 @@ class EmuSwitch:
                 elif event.type == pygame.JOYAXISMOTION and math.fabs(event.value) > config['axisThreshold']:
                     if event.axis == config['joyAxis']['upDown']:
                         if event.value < 0:
-                            p_event = MenuEventType.up
+                            p_event = MenuEventType["up"]
                         else:
-                            p_event = MenuEventType.down
+                            p_event = MenuEventType["down"]
                     if event.axis == config['joyAxis']['leftRight']:
                         if event.value < 0:
-                            p_event = MenuEventType.left
+                            p_event = MenuEventType["left"]
                         else:
-                            p_event = MenuEventType.right
+                            p_event = MenuEventType["right"]
 
                 if p_event is not None:
                     p_event = MenuEvent(p_event, False)
@@ -113,22 +113,22 @@ class EmuSwitch:
                         obj.input(p_event)
                     print(p_event.kind, p_event.repeat)
 
-                    if p_event.kind == MenuEventType.accept:
+                    if p_event.kind == MenuEventType["accept"]:
                         self.select_option()
-                    elif p_event.kind == MenuEventType.cancel:
+                    elif p_event.kind == MenuEventType["cancel"]:
                         if len(self.states) > 1:
                             self.exit_state()
                         else:
                             self.states[0]['cursor_pos'] = len(self.states[0]['options']) - 1
-                    elif p_event.kind == MenuEventType.up:
+                    elif p_event.kind == MenuEventType["up"]:
                         self.prev_option()
-                    elif p_event.kind == MenuEventType.down:
+                    elif p_event.kind == MenuEventType["down"]:
                         self.next_option()
-                    elif p_event.kind == MenuEventType.left and self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                    elif p_event.kind == MenuEventType["left"] and self.states[-1]["type"] == states.StateMenuStyle.filelist:
                         self.prev_page()
-                    elif p_event.kind == MenuEventType.right and self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                    elif p_event.kind == MenuEventType["right"] and self.states[-1]["type"] == states.StateMenuStyle.filelist:
                         self.next_page()
-                    elif p_event.kind == MenuEventType.information:
+                    elif p_event.kind == MenuEventType["information"]:
                         print(repr(self.states))
 
         if self.runningProcess is not None:
