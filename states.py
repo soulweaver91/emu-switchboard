@@ -5,6 +5,7 @@ __author__ = 'Soulweaver'
 import copy
 import statefuncs
 import os
+import glob
 from settings import config
 
 
@@ -40,11 +41,13 @@ def main():
 
 
 def list_platform(platform):
-    return make_state([
-        ('No ' + config["platforms"][platform]["name"] + ' type files found', 'informative_option'),
-        ('Recursive state test', 'list_platform', platform),
-        ('Back', 'previous_state')
-    ], statefuncs.noop_cb, config["platforms"][platform]["name"], StateMenuStyle.submenu)
+    files = sum([glob.glob(os.path.join(config["gamesDir"], selector))
+                for selector in config["platforms"][platform]["selector"].split(';')], [])
+
+    items = [(os.path.basename(name), 'launch_game', platform) for name in files]
+    items += [('Recursive state test', 'list_platform', platform),
+              ('Back', 'previous_state')]
+    return make_state(items, statefuncs.noop_cb, config["platforms"][platform]["name"], StateMenuStyle.filelist)
 
 
 def list_long_test():
