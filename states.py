@@ -1,66 +1,113 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 __author__ = 'Soulweaver'
 
 import copy
-import statefuncs
 import os
-from enum import Enum
+import sys
+import glob
+import subprocess
+from settings import config
 
 
-class StateMenuStyle(Enum):
-    main = 0,
-    submenu = 1,
+class StateMenuStyle:
+    main = 0
+    submenu = 1
     filelist = 2
 
 
-def make_state(options, callback, name="Unnamed state", kind=StateMenuStyle.submenu):
+def make_state(options, name="Unnamed state", kind=StateMenuStyle.submenu):
     return {
         'options': copy.copy(options),
-        'callback': callback,
         'cursor_pos': 0,
         'name': name,
         'type': kind
     }
 
 
-def open_calc():
-    return make_state([], statefuncs.open_calc_fn)
+def open_calc(env):
+
+    if sys.platform == 'win32':
+        app = 'calc'
+    else:
+        app = config["platforms"][0]["commandline"]
+
+    try:
+        print("Launching " + app + "...")
+        env.runningProcess = subprocess.Popen(app, stdin=None, stdout=None, stderr=None,
+                                              close_fds=True)
+    except FileNotFoundError:
+        print("Failed to launch the application.")
+    except:
+        raise
+    else:
+        print("Application started.")
+
+    return make_state([])
+
+
+def launch_game(env, platform, path):
+    try:
+        app = config["platforms"][platform]["commandline"].format(path)
+        print("Launching " + app + "...")
+        env.runningProcess = subprocess.Popen(app, stdin=None, stdout=None, stderr=None,
+                                              close_fds=True)
+    except FileNotFoundError:
+        print("Failed to launch the application.")
+    except:
+        raise
+    else:
+        print("Application started.")
+
+    return make_state([])
 
 
 def main():
-    return make_state([
-        ('NES', 'list_platform', 'nes'),
-        ('SNES', 'list_platform', 'snes'),
+    items = [(platform["name"], 'list_platform', pos) for pos, platform in enumerate(config["platforms"])]
+    items += [
         ('Long list test', 'list_long_test'),
         ('App launch test', 'open_calc'),
         ('Quit', 'exit_program')
-    ], statefuncs.noop_cb, "Main Menu", StateMenuStyle.main)
+    ]
+
+    return make_state(items, "Main Menu", StateMenuStyle.main)
 
 
-def list_platform(platform):
-    print(platform)
+def list_platform(env, platform):
+    files = sum([glob.glob(os.path.join(config["gamesDir"], selector))
+                for selector in config["platforms"][platform]["selector"].split(';')], [])
 
-    return make_state([
-        ('No ' + platform + ' type files found', 'informative_option'),
-        ('Recursive state test', 'list_platform', platform),
-        ('Back', 'previous_state')
-    ], statefuncs.noop_cb, platform + " games", StateMenuStyle.submenu)
+    items = [(os.path.basename(name), 'launch_game', platform, os.path.abspath(name)) for name in files]
+    items += [('Recursive state test', 'list_platform', platform),
+              ('Back', 'previous_state')]
+    return make_state(items, config["platforms"][platform]["name"], StateMenuStyle.filelist)
 
 
-def list_long_test():
-    dir_data = os.listdir(os.path.expanduser(os.path.join('~', 'Downloads')))
-    items = [(file, 'informative_option') for file in dir_data]
+def list_long_test(env):
+    mode = StateMenuStyle.filelist
+    try:
+        dir_data = os.listdir(config["gamesDir"])
+    except FileNotFoundError:
+        items = [('Error: could not open directory', 'informative_option')]
+        mode = StateMenuStyle.submenu
+    except:
+        raise
+    else:
+        items = [(file, 'informative_option') for file in dir_data]
+
     items.append(('Back', 'previous_state'))
-
-    return make_state(items, statefuncs.noop_cb, "Long list testing page", StateMenuStyle.filelist)
-
-
-def informative_option():
-    return make_state([], statefuncs.noop_cb)
+    return make_state(items, "Long list testing page", mode)
 
 
-def previous_state():
-    return make_state([], statefuncs.previous_state)
+def informative_option(env):
+    # do nothing
+    return make_state([])
 
 
-def exit_program():
-    return make_state([], statefuncs.exit_program_fn)
+def previous_state(env):
+    env.exit_state()
+    return make_state([])
+
+
+def exit_program(env):
+    sys.exit()

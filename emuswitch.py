@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 __author__ = 'Soulweaver'
 
 import os
@@ -8,6 +10,7 @@ import pygame
 import fonts
 from menuevent import MenuEvent, MenuEventType
 import states
+from settings import config
 
 
 class EmuSwitch:
@@ -45,27 +48,6 @@ class EmuSwitch:
         self.screen = pygame.display.set_mode((1280, 720))
 
         self.UIObjects = set()
-        self.config = {
-            # temporary fixed config for a specific controller model
-            'joyButtons': {
-                'down': 14,
-                'up': 12,
-                'left': 15,
-                'right': 13,
-                'accept': 2,
-                'cancel': 1,
-                'information': 9
-            },
-            'joyAxis': {
-                'upDown': 1,
-                'leftRight': 0
-            },
-            'gameKillSwitches': {
-                'joystick': [4, 5, 6, 7, 10, 11],
-                'keyboard': [pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_k]
-            },
-            'axisThreshold': 0.95
-        }
 
         self.runningProcess = None
         self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
@@ -95,35 +77,35 @@ class EmuSwitch:
                 p_event = None
                 if event.type == pygame.KEYDOWN:
                     if event.key in [pygame.K_UP, pygame.K_w, pygame.K_KP8]:
-                        p_event = MenuEventType.up
+                        p_event = MenuEventType["up"]
                     elif event.key in [pygame.K_DOWN, pygame.K_s, pygame.K_KP2]:
-                        p_event = MenuEventType.down
+                        p_event = MenuEventType["down"]
                     elif event.key in [pygame.K_LEFT, pygame.K_a, pygame.K_KP4]:
-                        p_event = MenuEventType.left
+                        p_event = MenuEventType["left"]
                     elif event.key in [pygame.K_RIGHT, pygame.K_d, pygame.K_KP6]:
-                        p_event = MenuEventType.right
+                        p_event = MenuEventType["right"]
                     elif event.key in [pygame.K_SPACE, pygame.K_KP_ENTER, pygame.K_RETURN]:
-                        p_event = MenuEventType.accept
+                        p_event = MenuEventType["accept"]
                     elif event.key in [pygame.K_BACKSPACE, pygame.K_ESCAPE]:
-                        p_event = MenuEventType.cancel
+                        p_event = MenuEventType["cancel"]
 
                 elif event.type == pygame.JOYBUTTONDOWN:
-                    for action, button in self.config['joyButtons'].items():
+                    for action, button in config['joyButtons'].items():
                         if event.button == button:
                             p_event = MenuEventType[action]
                             break
 
-                elif event.type == pygame.JOYAXISMOTION and math.fabs(event.value) > self.config['axisThreshold']:
-                    if event.axis == self.config['joyAxis']['upDown']:
+                elif event.type == pygame.JOYAXISMOTION and math.fabs(event.value) > config['axisThreshold']:
+                    if event.axis == config['joyAxis']['upDown']:
                         if event.value < 0:
-                            p_event = MenuEventType.up
+                            p_event = MenuEventType["up"]
                         else:
-                            p_event = MenuEventType.down
-                    if event.axis == self.config['joyAxis']['leftRight']:
+                            p_event = MenuEventType["down"]
+                    if event.axis == config['joyAxis']['leftRight']:
                         if event.value < 0:
-                            p_event = MenuEventType.left
+                            p_event = MenuEventType["left"]
                         else:
-                            p_event = MenuEventType.right
+                            p_event = MenuEventType["right"]
 
                 if p_event is not None:
                     p_event = MenuEvent(p_event, False)
@@ -131,22 +113,22 @@ class EmuSwitch:
                         obj.input(p_event)
                     print(p_event.kind, p_event.repeat)
 
-                    if p_event.kind == MenuEventType.accept:
+                    if p_event.kind == MenuEventType["accept"]:
                         self.select_option()
-                    elif p_event.kind == MenuEventType.cancel:
+                    elif p_event.kind == MenuEventType["cancel"]:
                         if len(self.states) > 1:
                             self.exit_state()
                         else:
                             self.states[0]['cursor_pos'] = len(self.states[0]['options']) - 1
-                    elif p_event.kind == MenuEventType.up:
+                    elif p_event.kind == MenuEventType["up"]:
                         self.prev_option()
-                    elif p_event.kind == MenuEventType.down:
+                    elif p_event.kind == MenuEventType["down"]:
                         self.next_option()
-                    elif p_event.kind == MenuEventType.left and self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                    elif p_event.kind == MenuEventType["left"] and self.states[-1]["type"] == states.StateMenuStyle.filelist:
                         self.prev_page()
-                    elif p_event.kind == MenuEventType.right and self.states[-1]["type"] == states.StateMenuStyle.filelist:
+                    elif p_event.kind == MenuEventType["right"] and self.states[-1]["type"] == states.StateMenuStyle.filelist:
                         self.next_page()
-                    elif p_event.kind == MenuEventType.information:
+                    elif p_event.kind == MenuEventType["information"]:
                         print(repr(self.states))
 
         if self.runningProcess is not None:
@@ -156,11 +138,11 @@ class EmuSwitch:
             joystick_count = pygame.joystick.get_count()
             for i in range(joystick_count):
                 if all([pygame.joystick.Joystick(i).get_button(button)
-                        for button in self.config['gameKillSwitches']['joystick']]):
+                        for button in config['gameKillSwitches']['joystick']]):
                     kill = True
 
             pressed_keys = pygame.key.get_pressed()
-            if all([pressed_keys[key] for key in self.config['gameKillSwitches']['keyboard']]):
+            if all([pressed_keys[key] for key in config['gameKillSwitches']['keyboard']]):
                 kill = True
 
             if kill:
@@ -217,8 +199,6 @@ class EmuSwitch:
         if len(state['options']) > 0:
             self.states.append(state)
 
-        state['callback'](self)
-
     def exit_state(self):
         self.states.pop()
 
@@ -246,7 +226,7 @@ class EmuSwitch:
             # which names a function in the imported states, and then call that function with the items in the same
             # tuple starting from the third one
             selected_option = self.states[-1]['options'][self.states[-1]['cursor_pos']]
-            received_state = getattr(states, selected_option[1])(*selected_option[2:])
+            received_state = getattr(states, selected_option[1])(self, *selected_option[2:])
         except AttributeError:
             print('ERROR: Invalid target state, trying to cope by ignoring it...')
         except:
