@@ -45,7 +45,7 @@ class EmuSwitch:
         self.clock = pygame.time.Clock()
         
         # Set the window options
-        self.screen = pygame.display.set_mode((1280, 720))
+        self.screen = pygame.display.set_mode((720, 450))
 
         self.UIObjects = set()
 
@@ -164,31 +164,31 @@ class EmuSwitch:
         if self.runningProcess is not None:
             self.screen.fill(fonts.c_black)
             fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, "Game in progress...",
-                                                                      (640, 360)),
-                                      "Game in progress...", fonts.c_white)
+                                                                      (360, 200), 50),
+                                      "Game in progress...", fonts.c_white, size=50)
         else:
             self.screen.blit(self.backdrop, self.backdrop.get_rect())
-            fonts.main_font.render_to(self.screen, (30, 30), "Emulator Switchboard (Test build)", fonts.c_white)
-            fonts.main_font.render_to(self.screen, (30, 70), ' '.join(["» " + state['name'] for state in self.states]),
-                                      fonts.c_white, size=20)
+            fonts.main_font.render_to(self.screen, (10, 10), "Emulator Switchboard (Test build)", fonts.c_white)
+            fonts.main_font.render_to(self.screen, (10, 28), ' '.join(["» " + state['name'] for state in self.states]),
+                                      fonts.c_white, size=15)
 
             if self.states[-1]["type"] == states.StateMenuStyle.filelist:
-                min_pos = max(self.states[-1]['cursor_pos'] - 9, 0)
-                min_offset = min_pos - self.states[-1]['cursor_pos'] + 9
-                for idx, option in enumerate(self.states[-1]["options"][min_pos:min_pos+19]):
-                    if idx == 9 - min_offset:
-                        self.screen.fill(fonts.c_white, pygame.Rect(55, 115 + idx * 30, 800, 35))
-                        fonts.main_font.render_to(self.screen, (60, 120 + idx * 30), option[0], fonts.c_black, size=30)
+                min_pos = min(max(self.states[-1]['cursor_pos'] - 11, 0), len(self.states[-1]["options"]) - 23)
+                min_offset = max(0, min_pos) - self.states[-1]['cursor_pos'] + 11
+                for idx, option in enumerate(self.states[-1]["options"][min_pos:min_pos+23]):
+                    if idx == 11 - min_offset:
+                        self.screen.fill(fonts.c_white, pygame.Rect(0, 60 + idx * 15, 720, 15))
+                        fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0], fonts.c_black, size=15)
                     else:
-                        fonts.main_font.render_to(self.screen, (60, 120 + idx * 30), option[0], fonts.c_white, size=30)
+                        fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0], fonts.c_white, size=15)
             else:
                 for idx, option in enumerate(self.states[-1]["options"]):
                     color = fonts.c_ltgray
                     if self.states[-1]['cursor_pos'] == idx:
                         color = fonts.c_white
                     fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, option[0],
-                                                                              (640, 240 + idx * 30), 30),
-                                              option[0], color, size=30)
+                                                                              (360, 60 + idx * 20), 20),
+                                              option[0], color, size=20)
 
             for obj in self.UIObjects:
                 obj.draw(self.screen)
