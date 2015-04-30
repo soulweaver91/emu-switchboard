@@ -199,8 +199,6 @@ class EmuSwitch:
         if len(state['options']) > 0:
             self.states.append(state)
 
-        state['callback'](self)
-
     def exit_state(self):
         self.states.pop()
 
@@ -228,7 +226,7 @@ class EmuSwitch:
             # which names a function in the imported states, and then call that function with the items in the same
             # tuple starting from the third one
             selected_option = self.states[-1]['options'][self.states[-1]['cursor_pos']]
-            received_state = getattr(states, selected_option[1])(*selected_option[2:])
+            received_state = getattr(states, selected_option[1])(self, *selected_option[2:])
         except AttributeError:
             print('ERROR: Invalid target state, trying to cope by ignoring it...')
         except:
