@@ -38,41 +38,41 @@ def load_config():
                 'keyboard': [pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_k]
             },
             'axisThreshold': 0.95,
-            'gamesDir': '~/Games',
+            'gamesDir': '/home/pi/Games',
             'platforms': [
                 {
                     'name': 'Nintendo Entertainment System',
-                    'commandline': '/usr/pi/Emulators/fceux {0}',
+                    'commandline': '/home/pi/Emulators/fceux {0}',
                     'selector': '*.nes'
                 },
                 {
                     'name': 'Super Nintendo Entertainment System',
-                    'commandline': '/usr/pi/Emulators/foo',
+                    'commandline': '/home/pi/Emulators/foo',
                     'selector': '*.sfc'
                 },
                 {
                     'name': 'Nintendo Game Boy',
-                    'commandline': '/usr/pi/Emulators/foo',
+                    'commandline': '/home/pi/Emulators/foo',
                     'selector': '*.gb'
                 },
                 {
                     'name': 'Nintendo Game Boy Color',
-                    'commandline': '/usr/pi/Emulators/foo',
+                    'commandline': '/home/pi/Emulators/foo',
                     'selector': '*.gbc'
                 },
                 {
                     'name': 'Nintendo Game Boy Advance',
-                    'commandline': '/usr/pi/Emulators/foo',
+                    'commandline': '/home/pi/Emulators/foo',
                     'selector': '*.gba;*.agb'
                 },
                 {
                     'name': 'Sony PlayStation',
-                    'commandline': '/usr/pi/Emulators/foo',
+                    'commandline': '/home/pi/Emulators/foo',
                     'selector': '*.psx.iso'
                 },
                 {
                     'name': 'Sega Mega Drive',
-                    'commandline': '/usr/pi/Emulators/foo',
+                    'commandline': '/home/pi/Emulators/picodrive/PicoDrive {0}',
                     'selector': '*.md'
                 }
             ]
