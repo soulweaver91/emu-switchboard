@@ -38,6 +38,7 @@ def load_config():
                 'keyboard': [pygame.K_ESCAPE, pygame.K_SPACE, pygame.K_k]
             },
             'axisThreshold': 0.95,
+            'gamesDir': '~/Games',
             'platforms': [
                 {
                     'name': 'Nintendo Entertainment System',

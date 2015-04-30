@@ -50,7 +50,7 @@ def list_platform(platform):
 def list_long_test():
     mode = StateMenuStyle.filelist
     try:
-        dir_data = os.listdir(os.path.expanduser(os.path.join('~', 'Games')))
+        dir_data = os.listdir(config["gamesDir"])
     except FileNotFoundError:
         items = [('Error: could not open directory', 'informative_option')]
         mode = StateMenuStyle.submenu
