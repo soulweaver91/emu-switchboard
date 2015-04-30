@@ -36,7 +36,7 @@ def open_calc(env):
         print("Launching " + app + "...")
         env.runningProcess = subprocess.Popen(app, stdin=None, stdout=None, stderr=None,
                                               close_fds=True)
-    except FileNotFoundError:
+    except (OSError, IOError):
         print("Failed to launch the application.")
     except:
         raise
@@ -52,7 +52,7 @@ def launch_game(env, platform, path):
         print("Launching " + app + "...")
         env.runningProcess = subprocess.Popen(app, stdin=None, stdout=None, stderr=None,
                                               close_fds=True)
-    except FileNotFoundError:
+    except (OSError, IOError):
         print("Failed to launch the application.")
     except:
         raise
@@ -87,7 +87,7 @@ def list_long_test(env):
     mode = StateMenuStyle.filelist
     try:
         dir_data = os.listdir(config["gamesDir"])
-    except FileNotFoundError:
+    except (OSError, IOError):
         items = [('Error: could not open directory', 'informative_option')]
         mode = StateMenuStyle.submenu
     except:
