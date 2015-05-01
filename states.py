@@ -32,15 +32,23 @@ class StateMenuStyle:
     main = 0
     submenu = 1
     filelist = 2
+    error = 3
+    warning = 4
+    information = 5
 
 
-def make_state(options, name="Unnamed state", kind=StateMenuStyle.submenu):
-    return {
+def make_state(options, name="Unnamed state", kind=StateMenuStyle.submenu, data={}):
+    # As the basis of the object, use the data object. Core variables will always be written over
+    # the ones provided in the data object, by the update method.
+    template = data.copy()
+    template.update({
         'options': copy.copy(options),
         'cursor_pos': 0,
         'name': name,
         'type': kind
-    }
+    })
+
+    return template
 
 
 def launch_game(env, platform, path):
@@ -81,7 +89,12 @@ def launch_game(env, platform, path):
 
 def main():
     items = [(platform["name"], 'list_platform', pos) for pos, platform in enumerate(config["platforms"])]
-    items += [('Quit', 'exit_program')]
+    items += [
+        ('Generate warning', 'display_warning', 'Generic warning'),
+        ('Generate error', 'display_error', 'Generic error'),
+        ('Generate info', 'display_info', 'Generic info'),
+        ('Quit', 'exit_program')
+    ]
 
     return make_state(items, "Main Menu", StateMenuStyle.main)
 
@@ -107,3 +120,27 @@ def previous_state(env):
 
 def exit_program(env):
     sys.exit()
+
+
+def display_error(env, message):
+    return make_state([
+        ('OK', 'previous_state')
+    ], "Error", StateMenuStyle.error, {
+        "message": message
+    })
+
+
+def display_warning(env, message):
+    return make_state([
+        ('OK', 'previous_state')
+    ], "Warning", StateMenuStyle.warning, {
+        "message": message
+    })
+
+
+def display_info(env, message):
+    return make_state([
+        ('OK', 'previous_state')
+    ], "Information", StateMenuStyle.information, {
+        "message": message
+    })
