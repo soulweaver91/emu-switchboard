@@ -47,13 +47,20 @@ class EmuSwitch:
         # Set the window options
         self.screen = pygame.display.set_mode((720, 450))
 
-        self.UIObjects = set()
-
-        self.runningProcess = None
-        self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
-
+        # Set up the state stack
         self.states = []
         self.enter_state(states.main())
+
+        self.UIObjects = set()
+
+        # Holds the launched game
+        self.runningProcess = None
+
+        # Check for the availability of FFmpeg
+        self.ffmpegAvailable = os.path.exists(config["ffmpegLocation"]) and os.access(config["ffmpegLocation"], os.X_OK)
+        self.ffmpegInstance = None
+
+        self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
 
     def start(self):
         while True:
@@ -158,6 +165,8 @@ class EmuSwitch:
         if self.runningProcess is not None:
             if self.runningProcess.poll() is not None:
                 self.runningProcess = None
+                self.ffmpegInstance.terminate()
+                self.ffmpegInstance.wait()
 
     def tick_draw(self):
         # Paint the backdrop

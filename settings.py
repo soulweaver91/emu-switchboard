@@ -5,6 +5,7 @@ __author__ = 'Soulweaver'
 import pygame
 import json
 
+
 config = {}
 
 
@@ -75,7 +76,10 @@ def load_config():
                     'commandline': '/home/pi/Emulators/picodrive/PicoDrive {0}',
                     'selector': '*.md'
                 }
-            ]
+            ],
+            'streamingKey': '',
+            'ffmpegLocation': '/usr/bin/ffmpeg',
+            'streamingServiceDomain': '199.9.251.164'
         }
         save_config(loaded)
 
