@@ -69,7 +69,7 @@ def launch_game(env, platform, path):
             else:
                 command = "{0} -f x11grab -r 10 -i :0.0 -f alsa -ac 2 -i default" \
                           " -c:v libx264 -preset ultrafast -pix_fmt yuv420p -b:v 200k -minrate 200k -maxrate 200k" \
-                          " -bufsize 100k -c:a libmp3lame -threads 0 -c:a libmp3lame -ab 96k -ar 22050 -threads 0 " \
+                          " -bufsize 100k -c:a libmp3lame -threads 0 -c:a libmp3lame -ab 96k -ar 44100 -threads 0 " \
                           " -f flv \"rtmp://{1}/app/{2}\"".format(config["ffmpegLocation"],
                                                                   config["streamingServiceDomain"],
                                                                   config["streamingKey"])
