@@ -59,6 +59,22 @@ def launch_game(env, platform, path):
         raise
     else:
         print("Application started.")
+        if env.ffmpegAvailable and config["streamingServiceDomain"] != "" and config["streamingKey"] != "":
+            if sys.platform == 'win32':
+                command = "{0} -f dshow -i video=\"screen-capture-recorder\":audio=\"Stereo Mix (VIA High Definition\""\
+                          " -s 1280x720 -r 30 -c:v libx264 -preset fast -pix_fmt yuv420p -c:a libmp3lame -threads 0" \
+                          " -f flv \"rtmp://{1}/app/{2}\"".format(config["ffmpegLocation"],
+                                                                  config["streamingServiceDomain"],
+                                                                  config["streamingKey"])
+            else:
+                command = "{0} -f x11grab -s 720x480 -r 10 -i :0.0 -f alsa -ac 2 -i default" \
+                          " -c:v libx264 -preset ultrafast -pix_fmt yuv420p -b:v 500k -minrate 500k -maxrate 500k" \
+                          " -bufsize 500k -c:a libmp3lame -threads 0 -c:a libmp3lame -ab 96k -ar 44100 -threads 0 " \
+                          " -f flv \"rtmp://{1}/app/{2}\"".format(config["ffmpegLocation"],
+                                                                  config["streamingServiceDomain"],
+                                                                  config["streamingKey"])
+                command = shlex.split(command)
+            env.ffmpegInstance = subprocess.Popen(command, stdin=None, stdout=None, stderr=None, close_fds=True)
 
     return make_state([])
 
