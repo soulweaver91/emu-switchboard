@@ -30,6 +30,7 @@ class EmuSwitch:
         joystick_count = pygame.joystick.get_count()
         if joystick_count == 0:
             print('WARNING: No joysticks detected!')
+            self.enter_state(states.display_warning(self, "Could not detect any joysticks!"))
         else:
             print('Found', joystick_count, 'joysticks.')
             for i in range(joystick_count):
@@ -64,6 +65,10 @@ class EmuSwitch:
         # Check for the availability of FFmpeg
         self.ffmpegAvailable = os.path.exists(config["ffmpegLocation"]) and os.access(config["ffmpegLocation"], os.X_OK)
         self.ffmpegInstance = None
+        if not self.ffmpegAvailable:
+            self.enter_state(states.display_warning(self, "Couldn't find an ffmpeg executable from:\n"
+                                                    + config["ffmpegLocation"]
+                                                    + "\n\nPlease verify the value to enable streaming support."))
 
         self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
         self.warning_bg = pygame.image.load(os.path.join('assets', 'warningbox.png'))
