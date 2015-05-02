@@ -103,9 +103,13 @@ def list_platform(env, platform):
     files = sum([glob.glob(os.path.join(config["gamesDir"], selector))
                 for selector in config["platforms"][platform]["selector"].split(';')], [])
 
-    items = [(os.path.basename(name), 'launch_game', platform, os.path.abspath(name)) for name in files]
-    items += [('Back', 'previous_state')]
-    return make_state(items, config["platforms"][platform]["name"], StateMenuStyle.filelist)
+    if len(files) > 0:
+        items = [(os.path.basename(name), 'launch_game', platform, os.path.abspath(name)) for name in files]
+        items += [('Back', 'previous_state')]
+        return make_state(items, config["platforms"][platform]["name"], StateMenuStyle.filelist)
+    else:
+        return display_info(env, 'No ' + config["platforms"][platform]["name"]
+                            + ' games were found in the game directory.')
 
 
 def informative_option(env):
