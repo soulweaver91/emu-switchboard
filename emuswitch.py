@@ -17,6 +17,10 @@ class EmuSwitch:
     def __init__(self):
         print('Starting up emu-switchboard...')
 
+        # Set up the state stack
+        self.states = []
+        self.enter_state(states.main())
+
         # Initialize pygame and joystick support
         pygame.init()
         pygame.joystick.init()
@@ -47,15 +51,6 @@ class EmuSwitch:
         
         # Set the window options
         self.screen = pygame.display.set_mode((720, 450))
-
-        # Set up the state stack
-        self.states = []
-        self.enter_state(states.main())
-
-        self.enter_state(states.display_error(self, "Test error"))
-        self.enter_state(states.display_error(self, "one\n\ntwo\n\nthree"))
-        self.enter_state(states.display_warning(self, "Test warning"))
-        self.enter_state(states.display_info(self, "Testing menu messages."))
 
         self.UIObjects = set()
 
