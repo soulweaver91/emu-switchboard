@@ -166,6 +166,11 @@ class EmuSwitch:
                 self.runningProcess.wait()
                 self.runningProcess = None
 
+                if self.ffmpegInstance.poll() is None:
+                    self.ffmpegInstance.terminate()
+                    self.ffmpegInstance.wait()
+                    self.ffmpegInstance = None
+
     def tick_process(self):
         for obj in self.UIObjects:
             obj.process()
@@ -173,8 +178,11 @@ class EmuSwitch:
         if self.runningProcess is not None:
             if self.runningProcess.poll() is not None:
                 self.runningProcess = None
-                self.ffmpegInstance.terminate()
-                self.ffmpegInstance.wait()
+
+                if self.ffmpegInstance.poll() is None:
+                    self.ffmpegInstance.terminate()
+                    self.ffmpegInstance.wait()
+                    self.ffmpegInstance = None
 
     def tick_draw(self):
         # Paint the backdrop
