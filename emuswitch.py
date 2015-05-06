@@ -200,14 +200,37 @@ class EmuSwitch:
                 title_col = fonts.c_white
 
             if self.states[-1]["type"] == states.StateMenuStyle.filelist:
-                min_pos = min(max(self.states[-1]['cursor_pos'] - 11, 0), len(self.states[-1]["options"]) - 23)
-                min_offset = max(0, min_pos) - self.states[-1]['cursor_pos'] + 11
-                for idx, option in enumerate(self.states[-1]["options"][min_pos:min_pos+23]):
-                    if idx == 11 - min_offset:
-                        self.screen.fill(fonts.c_white, pygame.Rect(0, 60 + idx * 15, 720, 15))
-                        fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0], fonts.c_black, size=15)
-                    else:
-                        fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0], fonts.c_white, size=15)
+
+                if len(self.states[-1]["options"]) > 23:
+                    min_pos = min(max(self.states[-1]['cursor_pos'] - 11, 0), len(self.states[-1]["options"]) - 23)
+                    min_offset = max(0, min_pos) - self.states[-1]['cursor_pos'] + 11
+                    for idx, option in enumerate(self.states[-1]["options"][min_pos:min_pos+23]):
+                        if idx == 11 - min_offset:
+                            self.screen.fill(fonts.c_white, pygame.Rect(0, 60 + idx * 15, 720, 15))
+                            fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0],
+                                                      fonts.c_black, size=15)
+                        else:
+                            fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0],
+                                                      fonts.c_white, size=15)
+                else:
+                    for idx, option in enumerate(self.states[-1]["options"][0:-1]):
+                        if idx == self.states[-1]['cursor_pos']:
+                            self.screen.fill(fonts.c_white, pygame.Rect(0, 60 + idx * 15, 720, 15))
+                            fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0],
+                                                      fonts.c_black, size=15)
+                        else:
+                            fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0],
+                                                      fonts.c_white, size=15)
+
+                        if self.states[-1]['cursor_pos'] == len(self.states[-1]["options"]) - 1:
+                            self.screen.fill(fonts.c_white, pygame.Rect(0, 60 + 22 * 15, 720, 15))
+                            fonts.mono_font.render_to(self.screen, (10, 60 + 22 * 15),
+                                                      self.states[-1]["options"][-1][0], fonts.c_black, size=15)
+                        else:
+                            pass
+                            fonts.mono_font.render_to(self.screen, (10, 60 + 22 * 15),
+                                                      self.states[-1]["options"][-1][0], fonts.c_white, size=15)
+
             elif self.states[-1]["type"] in [states.StateMenuStyle.error,
                                              states.StateMenuStyle.warning,
                                              states.StateMenuStyle.information]:
