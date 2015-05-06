@@ -230,14 +230,13 @@ class EmuSwitch:
                             fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0],
                                                       fonts.c_white, size=15)
 
-                        if self.states[-1]['cursor_pos'] == len(self.states[-1]["options"]) - 1:
-                            self.screen.fill(fonts.c_white, pygame.Rect(0, 60 + 22 * 15, 720, 15))
-                            fonts.mono_font.render_to(self.screen, (10, 60 + 22 * 15),
-                                                      self.states[-1]["options"][-1][0], fonts.c_black, size=15)
-                        else:
-                            pass
-                            fonts.mono_font.render_to(self.screen, (10, 60 + 22 * 15),
-                                                      self.states[-1]["options"][-1][0], fonts.c_white, size=15)
+                    if self.states[-1]['cursor_pos'] == len(self.states[-1]["options"]) - 1:
+                        self.screen.fill(fonts.c_white, pygame.Rect(0, 60 + 22 * 15, 720, 15))
+                        fonts.mono_font.render_to(self.screen, (10, 60 + 22 * 15),
+                                                  self.states[-1]["options"][-1][0], fonts.c_black, size=15)
+                    else:
+                        fonts.mono_font.render_to(self.screen, (10, 60 + 22 * 15),
+                                                  self.states[-1]["options"][-1][0], fonts.c_white, size=15)
 
             elif self.states[-1]["type"] in [states.StateMenuStyle.error,
                                              states.StateMenuStyle.warning,
