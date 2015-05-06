@@ -37,6 +37,16 @@ class StateMenuStyle:
     information = 5
 
 
+def find_exe_recursive(rdir):
+    exes = []
+    for folder, subs, files in os.walk(rdir):
+        for file in files:
+            if (os.path.splitext(file))[1].lower() == '.exe':
+                exes.append(os.path.join(folder, file))
+
+    return exes
+
+
 def make_state(options, name="Unnamed state", kind=StateMenuStyle.submenu, data={}):
     # As the basis of the object, use the data object. Core variables will always be written over
     # the ones provided in the data object, by the update method.
@@ -51,16 +61,31 @@ def make_state(options, name="Unnamed state", kind=StateMenuStyle.submenu, data=
     return template
 
 
-def launch_game(env, platform, path):
-    try:
-        if sys.platform == 'win32':
-            app = config["platforms"][platform]["commandline"].format('"' + path + '"')
-            print("Launching " + app + "...")
-        else:
-            app = shlex.split(config["platforms"][platform]["commandline"].format(shlex_quote(path)))
-            print("Launching " + ' '.join(app) + "...")
+def launch_console_game(env, platform, path):
+    if sys.platform == 'win32':
+        app = config["platforms"][platform]["commandline"].format('"' + path + '"')
+        print("Launching " + app + "...")
+    else:
+        app = shlex.split(config["platforms"][platform]["commandline"].format(shlex_quote(path)))
+        print("Launching " + ' '.join(app) + "...")
 
-        env.runningProcess = subprocess.Popen(app, stdin=None, stdout=None, stderr=None, close_fds=True)
+    return start_processes(env, app)
+
+
+def launch_dos(env, path):
+    if sys.platform == 'win32':
+        app = config["dosboxCmd"].format('"' + path + '"')
+        print("Launching " + app + "...")
+    else:
+        app = shlex.split(config["dosboxCmd"].format(shlex_quote(path)))
+        print("Launching " + ' '.join(app) + "...")
+
+    return start_processes(env, app)
+
+
+def start_processes(env, cmd):
+    try:
+        env.runningProcess = subprocess.Popen(cmd, stdin=None, stdout=None, stderr=None, close_fds=True)
     except (OSError, IOError):
         print("Failed to launch the application.")
     except:
@@ -90,6 +115,7 @@ def launch_game(env, platform, path):
 def main():
     items = [(platform["name"], 'list_platform', pos) for pos, platform in enumerate(config["platforms"])]
     items += [
+        ('DOS games', 'list_dos'),
         ('Generate warning', 'display_warning', 'Generic warning'),
         ('Generate error', 'display_error', 'Generic error'),
         ('Generate info', 'display_info', 'Generic info'),
@@ -104,12 +130,24 @@ def list_platform(env, platform):
                 for selector in config["platforms"][platform]["selector"].split(';')], [])
 
     if len(files) > 0:
-        items = [(os.path.basename(name), 'launch_game', platform, os.path.abspath(name)) for name in files]
+        items = [(os.path.basename(name), 'launch_console_game', platform, os.path.abspath(name)) for name in files]
         items += [('Back', 'previous_state')]
         return make_state(items, config["platforms"][platform]["name"], StateMenuStyle.filelist)
     else:
         return display_info(env, 'No ' + config["platforms"][platform]["name"]
                             + ' games were found in the game directory.')
+
+
+def list_dos(env):
+    files = find_exe_recursive(os.path.join(config["dosboxDir"]))
+
+    if len(files) > 0:
+        items = [(os.path.basename(name) + ' in ' + os.path.relpath(os.path.split(name)[0], config["dosboxDir"]),
+                  'launch_dos', os.path.abspath(name)) for name in files]
+        items += [('Back', 'previous_state')]
+        return make_state(items, 'DOS games', StateMenuStyle.filelist)
+    else:
+        return display_info(env, 'No DOS games were found in the game directory.')
 
 
 def informative_option(env):
