@@ -30,6 +30,7 @@ class EmuSwitch:
         joystick_count = pygame.joystick.get_count()
         if joystick_count == 0:
             print('WARNING: No joysticks detected!')
+            self.enter_state(states.display_warning(self, "Could not detect any joysticks!"))
         else:
             print('Found', joystick_count, 'joysticks.')
             for i in range(joystick_count):
@@ -47,13 +48,32 @@ class EmuSwitch:
         # Set the window options
         self.screen = pygame.display.set_mode((720, 450))
 
-        self.UIObjects = set()
-
-        self.runningProcess = None
-        self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
-
+        # Set up the state stack
         self.states = []
         self.enter_state(states.main())
+
+        self.enter_state(states.display_error(self, "Test error"))
+        self.enter_state(states.display_error(self, "one\n\ntwo\n\nthree"))
+        self.enter_state(states.display_warning(self, "Test warning"))
+        self.enter_state(states.display_info(self, "Testing menu messages."))
+
+        self.UIObjects = set()
+
+        # Holds the launched game
+        self.runningProcess = None
+
+        # Check for the availability of FFmpeg
+        self.ffmpegAvailable = os.path.exists(config["ffmpegLocation"]) and os.access(config["ffmpegLocation"], os.X_OK)
+        self.ffmpegInstance = None
+        if not self.ffmpegAvailable:
+            self.enter_state(states.display_warning(self, "Couldn't find an ffmpeg executable from:\n"
+                                                    + config["ffmpegLocation"]
+                                                    + "\n\nPlease verify the value to enable streaming support."))
+
+        self.backdrop = pygame.image.load(os.path.join('assets', 'backdrop.png'))
+        self.warning_bg = pygame.image.load(os.path.join('assets', 'warningbox.png'))
+        self.error_bg = pygame.image.load(os.path.join('assets', 'errorbox.png'))
+        self.info_bg = pygame.image.load(os.path.join('assets', 'infobox.png'))
 
     def start(self):
         while True:
@@ -158,6 +178,8 @@ class EmuSwitch:
         if self.runningProcess is not None:
             if self.runningProcess.poll() is not None:
                 self.runningProcess = None
+                self.ffmpegInstance.terminate()
+                self.ffmpegInstance.wait()
 
     def tick_draw(self):
         # Paint the backdrop
@@ -172,6 +194,16 @@ class EmuSwitch:
             fonts.main_font.render_to(self.screen, (10, 28), ' '.join(["» " + state['name'] for state in self.states]),
                                       fonts.c_white, size=15)
 
+            if self.states[-1]["type"] == states.StateMenuStyle.error:
+                self.screen.blit(self.error_bg, pygame.Rect(0, 50, 720, 400))
+                title_col = fonts.c_red
+            elif self.states[-1]["type"] == states.StateMenuStyle.warning:
+                self.screen.blit(self.warning_bg, pygame.Rect(0, 50, 720, 400))
+                title_col = fonts.c_yellow
+            elif self.states[-1]["type"] == states.StateMenuStyle.information:
+                self.screen.blit(self.info_bg, pygame.Rect(0, 50, 720, 400))
+                title_col = fonts.c_white
+
             if self.states[-1]["type"] == states.StateMenuStyle.filelist:
                 min_pos = min(max(self.states[-1]['cursor_pos'] - 11, 0), len(self.states[-1]["options"]) - 23)
                 min_offset = max(0, min_pos) - self.states[-1]['cursor_pos'] + 11
@@ -181,6 +213,23 @@ class EmuSwitch:
                         fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0], fonts.c_black, size=15)
                     else:
                         fonts.mono_font.render_to(self.screen, (10, 60 + idx * 15), option[0], fonts.c_white, size=15)
+            elif self.states[-1]["type"] in [states.StateMenuStyle.error,
+                                             states.StateMenuStyle.warning,
+                                             states.StateMenuStyle.information]:
+                fonts.main_font.render_to(self.screen,
+                                          fonts.centered_pos(fonts.main_font, self.states[-1]["name"], (360, 75), 30),
+                                          self.states[-1]["name"], title_col, size=30)
+
+                for i, line in enumerate(self.states[-1]["message"].split('\n')):
+                    fonts.main_font.render_to(self.screen, (20, 130 + 20 * i), line, fonts.c_black)
+
+                for idx, option in enumerate(self.states[-1]["options"]):
+                    color = fonts.c_ltgray
+                    if self.states[-1]['cursor_pos'] == idx:
+                        color = fonts.c_white
+                    fonts.main_font.render_to(self.screen, fonts.centered_pos(fonts.main_font, option[0],
+                                                                              (360, 360 + idx * 20), 20),
+                                              option[0], color, size=20)
             else:
                 for idx, option in enumerate(self.states[-1]["options"]):
                     color = fonts.c_ltgray
