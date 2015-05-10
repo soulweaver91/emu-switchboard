@@ -88,6 +88,7 @@ def start_processes(env, cmd):
         env.runningProcess = subprocess.Popen(cmd, stdin=None, stdout=None, stderr=None, close_fds=True)
     except (OSError, IOError):
         print("Failed to launch the application.")
+        return display_error(env, 'Launching the game failed!')
     except:
         raise
     else:
