@@ -166,7 +166,7 @@ class EmuSwitch:
                 self.runningProcess.wait()
                 self.runningProcess = None
 
-                if self.ffmpegInstance.poll() is None:
+                if self.ffmpegInstance is not None and self.ffmpegInstance.poll() is None:
                     self.ffmpegInstance.terminate()
                     self.ffmpegInstance.wait()
                     self.ffmpegInstance = None
@@ -179,7 +179,7 @@ class EmuSwitch:
             if self.runningProcess.poll() is not None:
                 self.runningProcess = None
 
-                if self.ffmpegInstance.poll() is None:
+                if self.ffmpegInstance is not None and self.ffmpegInstance.poll() is None:
                     self.ffmpegInstance.terminate()
                     self.ffmpegInstance.wait()
                     self.ffmpegInstance = None
