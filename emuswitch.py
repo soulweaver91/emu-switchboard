@@ -193,7 +193,7 @@ class EmuSwitch:
                                       "Game in progress...", fonts.c_white, size=50)
         else:
             self.screen.blit(self.backdrop, self.backdrop.get_rect())
-            fonts.main_font.render_to(self.screen, (10, 10), "Emulator Switchboard (Test build)", fonts.c_white)
+            fonts.main_font.render_to(self.screen, (10, 10), "Emulator Switchboard", fonts.c_white)
             fonts.main_font.render_to(self.screen, (10, 28), ' '.join(["» " + state['name'] for state in self.states]),
                                       fonts.c_white, size=15)
 
