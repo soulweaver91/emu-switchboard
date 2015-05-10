@@ -101,9 +101,9 @@ def start_processes(env, cmd):
                                                                   config["streamingServiceDomain"],
                                                                   config["streamingKey"])
             else:
-                command = "{0} -f x11grab -s 720x480 -r 10 -i :0.0 -f alsa -ac 2 -i default:CARD=Loopback" \
+                command = "{0} -f x11grab -s 720x480 -r 10 -i :0.0" \
                           " -c:v libx264 -preset ultrafast -pix_fmt yuv420p -b:v 500k -minrate 500k -maxrate 500k" \
-                          " -bufsize 500k -c:a libmp3lame -threads 0 -c:a libmp3lame -ab 96k -ar 44100 -threads 0 " \
+                          " -bufsize 500k" \
                           " -f flv \"rtmp://{1}/app/{2}\"".format(config["ffmpegLocation"],
                                                                   config["streamingServiceDomain"],
                                                                   config["streamingKey"])
