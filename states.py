@@ -88,6 +88,7 @@ def start_processes(env, cmd):
         env.runningProcess = subprocess.Popen(cmd, stdin=None, stdout=None, stderr=None, close_fds=True)
     except (OSError, IOError):
         print("Failed to launch the application.")
+        return display_error(env, 'Launching the game failed!')
     except:
         raise
     else:
@@ -100,9 +101,9 @@ def start_processes(env, cmd):
                                                                   config["streamingServiceDomain"],
                                                                   config["streamingKey"])
             else:
-                command = "{0} -f x11grab -s 720x480 -r 10 -i :0.0 -f alsa -ac 2 -i default:CARD=Loopback" \
+                command = "{0} -f x11grab -s 720x480 -r 10 -i :0.0" \
                           " -c:v libx264 -preset ultrafast -pix_fmt yuv420p -b:v 500k -minrate 500k -maxrate 500k" \
-                          " -bufsize 500k -c:a libmp3lame -threads 0 -c:a libmp3lame -ab 96k -ar 44100 -threads 0 " \
+                          " -bufsize 500k" \
                           " -f flv \"rtmp://{1}/app/{2}\"".format(config["ffmpegLocation"],
                                                                   config["streamingServiceDomain"],
                                                                   config["streamingKey"])
@@ -116,9 +117,6 @@ def main():
     items = [(platform["name"], 'list_platform', pos) for pos, platform in enumerate(config["platforms"])]
     items += [
         ('DOS games', 'list_dos'),
-        ('Generate warning', 'display_warning', 'Generic warning'),
-        ('Generate error', 'display_error', 'Generic error'),
-        ('Generate info', 'display_info', 'Generic info'),
         ('Quit', 'exit_program')
     ]
 

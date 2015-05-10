@@ -83,7 +83,7 @@ def load_config():
             'dosboxDir': '/home/pi/DOSGames/',
             'dosboxCmd': 'dosbox {0} -exit'
         }
-        save_config(loaded)
+        #save_config(loaded)
 
     return loaded
 
