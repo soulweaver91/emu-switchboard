@@ -193,9 +193,14 @@ class EmuSwitch:
                                       "Game in progress...", fonts.c_white, size=50)
         else:
             self.screen.blit(self.backdrop, self.backdrop.get_rect())
-            fonts.main_font.render_to(self.screen, (10, 10), "Emulator Switchboard", fonts.c_white)
-            fonts.main_font.render_to(self.screen, (10, 28), ' '.join(["» " + state['name'] for state in self.states]),
-                                      fonts.c_white, size=15)
+            if self.states[-1]["type"] in [states.StateMenuStyle.main,
+                                           states.StateMenuStyle.submenu,
+                                           states.StateMenuStyle.filelist]:
+                fonts.main_font.render_to(self.screen, (10, 10), "Emulator Switchboard", fonts.c_white)
+                fonts.main_font.render_to(self.screen, (10, 28), ' '.join(["» " + state['name'] for state in self.states]),
+                                          fonts.c_white, size=15)
+            else:
+                fonts.main_font.render_to(self.screen, (10, 20), "Emulator Switchboard", fonts.c_white)
 
             if self.states[-1]["type"] == states.StateMenuStyle.error:
                 self.screen.blit(self.error_bg, pygame.Rect(0, 50, 720, 400))
