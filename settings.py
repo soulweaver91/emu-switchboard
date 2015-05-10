@@ -79,7 +79,9 @@ def load_config():
             ],
             'streamingKey': '',
             'ffmpegLocation': '/usr/bin/ffmpeg',
-            'streamingServiceDomain': '199.9.251.164'
+            'streamingServiceDomain': '199.9.251.164',
+            'dosboxDir': '/home/pi/DOSGames/',
+            'dosboxCmd': 'dosbox {0} -exit'
         }
         save_config(loaded)
 
