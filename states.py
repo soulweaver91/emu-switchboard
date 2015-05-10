@@ -116,9 +116,6 @@ def main():
     items = [(platform["name"], 'list_platform', pos) for pos, platform in enumerate(config["platforms"])]
     items += [
         ('DOS games', 'list_dos'),
-        ('Generate warning', 'display_warning', 'Generic warning'),
-        ('Generate error', 'display_error', 'Generic error'),
-        ('Generate info', 'display_info', 'Generic info'),
         ('Quit', 'exit_program')
     ]
 
